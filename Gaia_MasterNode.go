@@ -2,12 +2,22 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 )
+
+// Struct containing all important system information
+type SystemInfo struct {
+	SystemId              string `json:"empname"`
+	SystemType            string
+	BatteryLifePercent    float64
+	BatteryHoursRemaining float64
+}
 
 // Prints error, then exits with Exit Code 1
 func handleError(err error) {
@@ -16,11 +26,11 @@ func handleError(err error) {
 }
 
 func main() {
-	// Port on which master node listens
-	const port = ":3141"
+	// Port on which Master Node listens
+	const port = 3141
 
-	// Starts master node server
-	ln, err := net.Listen("tcp", port)
+	// Starts Master Node server
+	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		handleError(err)
 	}
@@ -33,14 +43,17 @@ func main() {
 			handleError(err)
 		}
 
-		// Gets message sent by slave node
+		// Gets message sent by Slave Node
 		message, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			handleError(err)
 		}
 		message = strings.TrimSuffix(message, "\n")
 
+		var messageStruct SystemInfo
+		json.Unmarshal([]byte(message), &messageStruct)
 		fmt.Println("Message:", message)
+		fmt.Println("Message Struct:", messageStruct)
 	}
 }
 
