@@ -6,19 +6,46 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 )
 
 // Struct containing all important system information
 type SystemInfo struct {
-	SystemId              string `json:"empname"`
+	SystemId              string
 	SystemType            string
 	BatteryLifePercent    float64
 	BatteryHoursRemaining float64
 }
 
+// Returns the current battery %
+func getMacOSBatteryPercentage() float64 {
+	// Runs bash command that gets battery % and converts battery % from string to float64
+	batteryCommandString := [3]string{"bash", "-c", `pmset -g batt | grep -Eo "\d+%" | cut -d% -f1`}
+
+	batteryCommand := exec.Command(
+		batteryCommandString[0],
+		batteryCommandString[1],
+		batteryCommandString[2],
+	)
+	rawOutput, _ := batteryCommand.CombinedOutput()
+	rawOutputString := strings.TrimSuffix(string(rawOutput), "\n")
+
+	batteryPercentage, _ := strconv.ParseFloat(rawOutputString, 64)
+
+	return batteryPercentage
+}
+
 // Sends system information
 func sendSystemInfo(conn net.Conn) {
+	siTest := SystemInfo{}
+	fmt.Println("siTest:", siTest)
+
+	siTest.BatteryLifePercent = getMacOSBatteryPercentage()
+	//siTest.BatteryLifePercent = 2
+	fmt.Println("siTest:", siTest)
+
 	// Creates SystemInfo struct, then converts it to JSON
 	si := SystemInfo{
 		SystemId:              "SYSTEM001",

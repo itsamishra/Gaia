@@ -13,7 +13,7 @@ import (
 
 // Struct containing all important system information
 type SystemInfo struct {
-	SystemId              string `json:"empname"`
+	SystemId              string
 	SystemType            string
 	BatteryLifePercent    float64
 	BatteryHoursRemaining float64
@@ -56,5 +56,3 @@ func main() {
 		fmt.Println("Message Struct:", messageStruct)
 	}
 }
-
-// TODO Figure out how to parse JSON
