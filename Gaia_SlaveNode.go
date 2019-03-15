@@ -7,29 +7,29 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 )
 
 // Struct containing all important system information
 type SystemInfo struct {
-	SystemId              string
-	SystemType            string
-	BatteryLifePercent    float64
-	BatteryHoursRemaining float64
+	SystemUser         string
+	SystemType         string
+	BatteryLifePercent float64
 }
 
 // Returns the current battery %
-func getMacOSBatteryPercentage() float64 {
+func getBatteryPercentageMacOS() float64 {
 	// Runs bash command that gets battery % and converts battery % from string to float64
-	batteryCommandString := [3]string{"bash", "-c", `pmset -g batt | grep -Eo "\d+%" | cut -d% -f1`}
+	commandString := [3]string{"bash", "-c", `pmset -g batt | grep -Eo "\d+%" | cut -d% -f1`}
 
-	batteryCommand := exec.Command(
-		batteryCommandString[0],
-		batteryCommandString[1],
-		batteryCommandString[2],
+	command := exec.Command(
+		commandString[0],
+		commandString[1],
+		commandString[2],
 	)
-	rawOutput, _ := batteryCommand.CombinedOutput()
+	rawOutput, _ := command.CombinedOutput()
 	rawOutputString := strings.TrimSuffix(string(rawOutput), "\n")
 
 	batteryPercentage, _ := strconv.ParseFloat(rawOutputString, 64)
@@ -37,23 +37,34 @@ func getMacOSBatteryPercentage() float64 {
 	return batteryPercentage
 }
 
-// Sends system information
-func sendSystemInfo(conn net.Conn) {
-	siTest := SystemInfo{}
-	fmt.Println("siTest:", siTest)
+// Returns the system id
+func getSystemUserMacOS() string {
+	commandString := [3]string{"bash", "-c", `whoami`}
 
-	siTest.BatteryLifePercent = getMacOSBatteryPercentage()
-	//siTest.BatteryLifePercent = 2
-	fmt.Println("siTest:", siTest)
+	command := exec.Command(
+		commandString[0],
+		commandString[1],
+		commandString[2],
+	)
+	rawOutput, _ := command.CombinedOutput()
+	rawOutputString := strings.TrimSuffix(string(rawOutput), "\n")
+
+	return rawOutputString
+}
+
+// Sends system information
+func sendSystemInfoMacOS(conn net.Conn) {
+	sysInfo := SystemInfo{}
+
+	// Sets system type (i.e. operating system)
+	sysInfo.SystemType = "MacOS"
+	// Gets battery life %
+	sysInfo.BatteryLifePercent = getBatteryPercentageMacOS()
+	// Gets System Id
+	sysInfo.SystemUser = getSystemUserMacOS()
 
 	// Creates SystemInfo struct, then converts it to JSON
-	si := SystemInfo{
-		SystemId:              "SYSTEM001",
-		SystemType:            "MacOS",
-		BatteryLifePercent:    64,
-		BatteryHoursRemaining: 2.5,
-	}
-	jsonBytes, _ := json.Marshal(si)
+	jsonBytes, _ := json.Marshal(sysInfo)
 	var jsonStr = string(jsonBytes) + "\n"
 	fmt.Printf(jsonStr)
 
@@ -67,10 +78,26 @@ func handleError(err error) {
 	os.Exit(1)
 }
 
+func getOperatingSystem() string {
+	var operatingSystem string
+
+	switch runtime.GOOS {
+	case "darwin":
+		operatingSystem = "MacOS"
+	default:
+		panic("ERROR: Couldn't detect Operating System!")
+	}
+
+	return operatingSystem
+}
+
 func main() {
 	const googleComputeIp = "35.243.155.9"
 	const localIp = "127.0.0.1"
 	const port = 3141
+
+	operatingSystem := getOperatingSystem()
+	fmt.Println(operatingSystem)
 
 	// Connects to Master Node
 	conn, err := net.Dial("tcp", localIp+":"+strconv.Itoa(port))
@@ -79,7 +106,7 @@ func main() {
 	}
 
 	// Sends system info to Master Node
-	sendSystemInfo(conn)
+	if operatingSystem == "MacOS" {
+		sendSystemInfoMacOS(conn)
+	}
 }
-
-// TODO send JSON containing macbook username, battery level, battery time remaining, etc.

@@ -13,10 +13,9 @@ import (
 
 // Struct containing all important system information
 type SystemInfo struct {
-	SystemId              string
-	SystemType            string
-	BatteryLifePercent    float64
-	BatteryHoursRemaining float64
+	SystemUser         string
+	SystemType         string
+	BatteryLifePercent float64
 }
 
 // Prints error, then exits with Exit Code 1
