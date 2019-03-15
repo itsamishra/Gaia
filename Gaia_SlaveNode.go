@@ -84,6 +84,10 @@ func getOperatingSystem() string {
 	switch runtime.GOOS {
 	case "darwin":
 		operatingSystem = "MacOS"
+	case "windows":
+		operatingSystem = "Windows"
+	case "linux":
+		operatingSystem = "Linux"
 	default:
 		panic("ERROR: Couldn't detect Operating System!")
 	}
