@@ -6,10 +6,11 @@ import "bufio"
 import "os"
 
 func main() {
-	//listenPort1 := "127.0.0.1:8081"
-	listenPort2 := "35.243.155.9:8081"
+	// Port on
+	listenPort1 := "127.0.0.1:8081"
+	//listenPort2 := "35.243.155.9:8081"
 	// connect to this socket
-	conn, _ := net.Dial("tcp", listenPort2)
+	conn, _ := net.Dial("tcp", listenPort1)
 	for {
 		// read in input from stdin
 		reader := bufio.NewReader(os.Stdin)

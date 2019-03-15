@@ -7,7 +7,7 @@ func main() {
 
 	fmt.Println(message)
 
-	for i := 0; i<5; i++{
+	for i := 0; i < 5; i++ {
 		fmt.Println(i)
 	}
 }
