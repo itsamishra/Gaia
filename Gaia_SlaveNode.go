@@ -1,21 +1,31 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+
+	//"encoding/json"
 	"fmt"
-	"log"
 	"net"
-	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
+
+// Meessage sent
+type SlaveNodeMessage struct {
+	IsPollMessage bool // Is this message polling the server?
+	IsDataMessage bool // Is this message returning data?
+	SystemInfo    SystemInfo
+}
 
 // Struct containing all important system information
 type SystemInfo struct {
 	SystemUser         string
 	SystemType         string
+	SystemHostname     string
 	BatteryLifePercent float64
 }
 
@@ -52,8 +62,22 @@ func getSystemUserMacOS() string {
 	return rawOutputString
 }
 
+func getSystemHostnameMacOS() string {
+	commandString := [3]string{"bash", "-c", `hostname`}
+
+	command := exec.Command(
+		commandString[0],
+		commandString[1],
+		commandString[2],
+	)
+	rawOutput, _ := command.CombinedOutput()
+	rawOutputString := strings.TrimSuffix(string(rawOutput), "\n")
+
+	return rawOutputString
+}
+
 // Sends system information
-func sendSystemInfoMacOS(conn net.Conn) {
+func sendSystemInfoMacOS() SystemInfo {
 	sysInfo := SystemInfo{}
 
 	// Sets system type (i.e. operating system)
@@ -62,20 +86,25 @@ func sendSystemInfoMacOS(conn net.Conn) {
 	sysInfo.BatteryLifePercent = getBatteryPercentageMacOS()
 	// Gets System Id
 	sysInfo.SystemUser = getSystemUserMacOS()
+	// Gets System Hostname
+	sysInfo.SystemHostname = getSystemHostnameMacOS()
 
-	// Creates SystemInfo struct, then converts it to JSON
-	jsonBytes, _ := json.Marshal(sysInfo)
-	var jsonStr = string(jsonBytes) + "\n"
-	fmt.Printf(jsonStr)
-
-	// Sends JSON containing system info to Master Node
-	fmt.Fprintf(conn, jsonStr)
+	return sysInfo
 }
 
-// Prints error, then exits with Exit Code 1
-func handleError(err error) {
-	log.Fatal(err)
-	os.Exit(1)
+func sendSystemInfo(operatingSystem string) SystemInfo {
+	var sysInfo SystemInfo
+
+	// Sends system info to Master Node
+	if operatingSystem == "MacOS" {
+		sysInfo = sendSystemInfoMacOS()
+	} else if operatingSystem == "Windows" {
+		// TODO Add Windows functionality
+	} else if operatingSystem == "Linux" {
+		// TODO Add Linux functionality
+	}
+
+	return sysInfo
 }
 
 func getOperatingSystem() string {
@@ -95,22 +124,62 @@ func getOperatingSystem() string {
 	return operatingSystem
 }
 
+// Sends a polling message to Master Node
+func sendPollingMessage(conn net.Conn){
+	sendMessage(conn, true, false, SystemInfo{})
+}
+
+// Creates and sends message to Master Node
+func sendMessage(conn net.Conn, isPollMessage bool, isDataMessage bool, sysInfo SystemInfo){
+	message := SlaveNodeMessage{
+		IsPollMessage:isPollMessage,
+		IsDataMessage:isDataMessage,
+		SystemInfo:sysInfo,
+	}
+	messageBytes, _ := json.Marshal(message)
+	messageJson := string(messageBytes) + "\n"
+	fmt.Fprintf(conn, messageJson)
+}
+
 func main() {
-	const googleComputeIp = "35.243.155.9"
+	const googleComputeIp = "35	.243.155.9"
 	const localIp = "127.0.0.1"
 	const port = 3141
+	const pollingDelaySeconds = 5
 
-	operatingSystem := getOperatingSystem()
-	fmt.Println(operatingSystem)
+	//operatingSystem := getOperatingSystem()
 
-	// Connects to Master Node
-	conn, err := net.Dial("tcp", localIp+":"+strconv.Itoa(port))
-	if err != nil {
-		handleError(err)
-	}
+	for {
+		// Connects to Master Node
+		conn, err := net.Dial("tcp", localIp+":"+strconv.Itoa(port))
+		if err != nil {
+			panic(err)
+		}
 
-	// Sends system info to Master Node
-	if operatingSystem == "MacOS" {
-		sendSystemInfoMacOS(conn)
+		// Sends poll message
+		sendPollingMessage(conn)
+
+
+		//sysInfo := sendSystemInfo(operatingSystem)
+		//message := SlaveNodeMessage{
+		//	IsPollMessage: false,
+		//	IsDataMessage: true,
+		//	SystemInfo:  sysInfo,
+		//}
+		//// Creates SystemInfo struct, then converts it to JSON
+		//messageBytes, _ := json.Marshal(message)
+		//messageJson := string(messageBytes) + "\n"
+		//
+		//// Sends JSON containing system info to Master Node
+		//fmt.Fprintf(conn, messageJson)
+
+		masterNodeResponseJson, _ := bufio.NewReader(conn).ReadString('\n')
+		fmt.Print(masterNodeResponseJson)
+
+		time.Sleep(time.Duration(pollingDelaySeconds) * time.Second)
 	}
 }
+
+
+// TODO Add polling
+// TODO Add support for WantTimeDelayOnResponse (MasterNodeMessage response)
