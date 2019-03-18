@@ -7,14 +7,23 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	//"strings"
+	"time"
 )
 
+// Message sent
 type MasterNodeMessage struct {
 	WantResponse               bool
 	WantSystemInfo             bool
-	WantTimeDelayOnResponse    bool
 	TimeDelayOnResponseSeconds int
+	Timestamp                  int64 // When was this sent?
+}
+
+// Message received
+type SlaveNodeMessage struct {
+	IsPollMessage bool // Is this message polling the server?
+	IsDataMessage bool // Is this message returning data?
+	SystemInfo    SystemInfo
+	Timestamp     int64 // When was this sent?
 }
 
 // Struct containing all important system information
@@ -58,17 +67,16 @@ func main() {
 			panic(err)
 		}
 		fmt.Print("Received Message:\n" + message)
-		//fmt.Printf(message)
 
 		var messageStruct SystemInfo
 		json.Unmarshal([]byte(message), &messageStruct)
 
 		// Asks for response
 		masterNodeResponse := MasterNodeMessage{
-			WantResponse:               true,
-			WantSystemInfo:             true,
-			WantTimeDelayOnResponse:    false,
-			TimeDelayOnResponseSeconds: 0,
+			WantResponse:               false,
+			WantSystemInfo:             false,
+			TimeDelayOnResponseSeconds: 3,
+			Timestamp:                  time.Now().Unix(),
 		}
 		jsonBytes, _ := json.Marshal(masterNodeResponse)
 		var jsonStr = string(jsonBytes) + "\n"

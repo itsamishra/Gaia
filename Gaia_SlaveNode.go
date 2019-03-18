@@ -3,8 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-
-	//"encoding/json"
 	"fmt"
 	"net"
 	"os/exec"
@@ -14,11 +12,20 @@ import (
 	"time"
 )
 
-// Meessage sent
+// Message received
+type MasterNodeMessage struct {
+	WantResponse               bool
+	WantSystemInfo             bool
+	TimeDelayOnResponseSeconds int
+	Timestamp                  int64 // When was this sent?
+}
+
+// Message sent
 type SlaveNodeMessage struct {
 	IsPollMessage bool // Is this message polling the server?
 	IsDataMessage bool // Is this message returning data?
 	SystemInfo    SystemInfo
+	Timestamp     int64 // When was this sent?
 }
 
 // Struct containing all important system information
@@ -125,30 +132,46 @@ func getOperatingSystem() string {
 }
 
 // Sends a polling message to Master Node
-func sendPollingMessage(conn net.Conn){
+func sendPollingMessage(conn net.Conn) {
 	sendMessage(conn, true, false, SystemInfo{})
 }
 
 // Creates and sends message to Master Node
-func sendMessage(conn net.Conn, isPollMessage bool, isDataMessage bool, sysInfo SystemInfo){
+func sendMessage(conn net.Conn, isPollMessage bool, isDataMessage bool, sysInfo SystemInfo) {
 	message := SlaveNodeMessage{
-		IsPollMessage:isPollMessage,
-		IsDataMessage:isDataMessage,
-		SystemInfo:sysInfo,
+		IsPollMessage: isPollMessage,
+		IsDataMessage: isDataMessage,
+		SystemInfo:    sysInfo,
+		Timestamp:     time.Now().Unix(),
 	}
 	messageBytes, _ := json.Marshal(message)
 	messageJson := string(messageBytes) + "\n"
 	fmt.Fprintf(conn, messageJson)
 }
 
+// Converts Master Node message from JSON -> struct
+func getMasterNodeMessageStruct(messageJson string) MasterNodeMessage {
+	var messageStruct MasterNodeMessage
+	json.Unmarshal([]byte(messageJson), &messageStruct)
+
+	return messageStruct
+}
+
 func main() {
-	const googleComputeIp = "35	.243.155.9"
+	const googleComputeIp = "35.243.155.9"
 	const localIp = "127.0.0.1"
 	const port = 3141
-	const pollingDelaySeconds = 5
 
 	//operatingSystem := getOperatingSystem()
 
+	// Sets initial values
+	pollingDelaySeconds := 5
+	masterNodeResponse := MasterNodeMessage{
+		WantResponse:false,
+		WantSystemInfo:false,
+		TimeDelayOnResponseSeconds:5,
+		Timestamp:time.Now().Unix(),
+	}
 	for {
 		// Connects to Master Node
 		conn, err := net.Dial("tcp", localIp+":"+strconv.Itoa(port))
@@ -156,9 +179,22 @@ func main() {
 			panic(err)
 		}
 
-		// Sends poll message
-		sendPollingMessage(conn)
+		// If Master Node doesn't want response, send polling message
+		// Else, respond with the message the Master Node requested
+		if masterNodeResponse.WantResponse==false{
+			sendPollingMessage(conn)
+		} else {
+			systemInfo := SystemInfo{}
 
+			// If System Info is requested, gets system information
+			if masterNodeResponse.WantSystemInfo == true{
+				// TODO: Add system info here
+				systemInfo.SystemHostname = "test name please ignore"
+			}
+
+			// Sends message
+			sendMessage(conn, false, true, systemInfo)
+		}
 
 		//sysInfo := sendSystemInfo(operatingSystem)
 		//message := SlaveNodeMessage{
@@ -174,12 +210,17 @@ func main() {
 		//fmt.Fprintf(conn, messageJson)
 
 		masterNodeResponseJson, _ := bufio.NewReader(conn).ReadString('\n')
+		masterNodeResponse = getMasterNodeMessageStruct(masterNodeResponseJson)
 		fmt.Print(masterNodeResponseJson)
+		//fmt.Println(masterNodeResponse)
+		fmt.Println(masterNodeResponse.WantResponse)
 
+		// Sleeps for time requested by user
+		pollingDelaySeconds = masterNodeResponse.TimeDelayOnResponseSeconds
 		time.Sleep(time.Duration(pollingDelaySeconds) * time.Second)
 	}
 }
 
-
+//
 // TODO Add polling
 // TODO Add support for WantTimeDelayOnResponse (MasterNodeMessage response)
