@@ -12,8 +12,8 @@ import (
 
 // Message sent
 type MasterNodeMessage struct {
-	WantResponse               bool
-	WantSystemInfo             bool
+	WantDataResponse           bool // Tells Slave Node if data is requested
+	WantSystemInfo             bool // Tells Slave Node if System Info is requested
 	TimeDelayOnResponseSeconds int
 	Timestamp                  int64 // When was this sent?
 }
@@ -34,10 +34,31 @@ type SystemInfo struct {
 	BatteryLifePercent float64
 }
 
+// Converts Slave Node message from JSON -> struct
+func getSlaveNodeMessageStruct(messageJson string) SlaveNodeMessage {
+	var messageStruct SlaveNodeMessage
+	json.Unmarshal([]byte(messageJson), &messageStruct)
+
+	return messageStruct
+}
+
 func serveStaticHtml() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/", fs)
 	http.ListenAndServe(":3000", nil)
+}
+
+// Creates and sends message to Slave Node
+func sendMessage(conn net.Conn, wantDataResponse bool, wantSystemInfo bool, timeDelayOnResponseSeconds int) {
+	message := MasterNodeMessage{
+		WantDataResponse:           wantDataResponse,
+		WantSystemInfo:             wantSystemInfo,
+		TimeDelayOnResponseSeconds: timeDelayOnResponseSeconds,
+	}
+	messageBytes, _ := json.Marshal(message)
+	messageJson := string(messageBytes) + "\n"
+	fmt.Fprintf(conn, messageJson)
+
 }
 
 func main() {
@@ -67,14 +88,15 @@ func main() {
 			panic(err)
 		}
 		fmt.Print("Received Message:\n" + message)
+		fmt.Println(getSlaveNodeMessageStruct(message))
 
 		var messageStruct SystemInfo
 		json.Unmarshal([]byte(message), &messageStruct)
 
 		// Asks for response
 		masterNodeResponse := MasterNodeMessage{
-			WantResponse:               false,
-			WantSystemInfo:             false,
+			WantDataResponse:           true,
+			WantSystemInfo:             true,
 			TimeDelayOnResponseSeconds: 3,
 			Timestamp:                  time.Now().Unix(),
 		}

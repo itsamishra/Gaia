@@ -14,7 +14,7 @@ import (
 
 // Message received
 type MasterNodeMessage struct {
-	WantResponse               bool
+	WantDataResponse           bool
 	WantSystemInfo             bool
 	TimeDelayOnResponseSeconds int
 	Timestamp                  int64 // When was this sent?
@@ -167,10 +167,10 @@ func main() {
 	// Sets initial values
 	pollingDelaySeconds := 5
 	masterNodeResponse := MasterNodeMessage{
-		WantResponse:false,
-		WantSystemInfo:false,
-		TimeDelayOnResponseSeconds:5,
-		Timestamp:time.Now().Unix(),
+		WantDataResponse:           false,
+		WantSystemInfo:             false,
+		TimeDelayOnResponseSeconds: 5,
+		Timestamp:                  time.Now().Unix(),
 	}
 	for {
 		// Connects to Master Node
@@ -181,13 +181,13 @@ func main() {
 
 		// If Master Node doesn't want response, send polling message
 		// Else, respond with the message the Master Node requested
-		if masterNodeResponse.WantResponse==false{
+		if masterNodeResponse.WantDataResponse == false {
 			sendPollingMessage(conn)
 		} else {
 			systemInfo := SystemInfo{}
 
 			// If System Info is requested, gets system information
-			if masterNodeResponse.WantSystemInfo == true{
+			if masterNodeResponse.WantSystemInfo == true {
 				// TODO: Add system info here
 				systemInfo.SystemHostname = "test name please ignore"
 			}
@@ -213,14 +213,10 @@ func main() {
 		masterNodeResponse = getMasterNodeMessageStruct(masterNodeResponseJson)
 		fmt.Print(masterNodeResponseJson)
 		//fmt.Println(masterNodeResponse)
-		fmt.Println(masterNodeResponse.WantResponse)
+		fmt.Println(masterNodeResponse.WantDataResponse)
 
 		// Sleeps for time requested by user
 		pollingDelaySeconds = masterNodeResponse.TimeDelayOnResponseSeconds
 		time.Sleep(time.Duration(pollingDelaySeconds) * time.Second)
 	}
 }
-
-//
-// TODO Add polling
-// TODO Add support for WantTimeDelayOnResponse (MasterNodeMessage response)
