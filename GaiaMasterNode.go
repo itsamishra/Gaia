@@ -7,33 +7,42 @@ import (
 	"time"
 )
 
+type Job struct {
+	IP string
+}
+
+func handleSubNodeConnection(conn net.Conn) {
+	// Sends message to Sub Node
+	_, err := fmt.Fprintf(conn, "This is a message from the Master Node\n")
+	handleError(err)
+}
+
+// Listens for new jobs and adds them to jobSlice
+func listenForNewJobs() {
+
+}
+
+var jobSlice = make([]Job, 0)
+
 func main() {
 	const port = 3141
+
+	fmt.Println(jobSlice)
 
 	// Creates listener
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	handleError(err)
 
-	// Infinite loop - listens for connections forever
+	// Connects to
 	for {
 		// Creates connection to Sub Node
 		conn, err := ln.Accept()
 		handleError(err)
-		// fmt.Println("test")
 
-		time.Sleep(5 * time.Second)
+		// Artificial pause
+		time.Sleep(500 * time.Millisecond)
 
-		// Sends message
-		fmt.Fprintf(conn, "This is a message from the Master Node\n")
-
-		// // Reads incoming message
-		// message, err := bufio.NewReader(conn).ReadString('\n')
-		// handleError(err)
-		// fmt.Print(message)
-
-		// // Responds to Sub Node
-		// uMessage := strings.ToUpper(message)
-		// fmt.Fprintf(conn, uMessage)
+		go handleSubNodeConnection(conn)
 	}
 }
 
@@ -43,3 +52,5 @@ func handleError(err error) {
 		panic(err)
 	}
 }
+
+// TODO: See new picture --> main for loop should be listening for request from Express app
