@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 
@@ -13,6 +14,11 @@ import (
 type NodeData struct {
 	IP           string
 	BatteryLevel float64
+}
+
+type SubNode struct {
+	Url  string
+	Name string
 }
 
 // Adds header to prevent Access-Control-Allow-Origin CORS error
@@ -42,11 +48,22 @@ func getNodeStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(nodeDataSlice)
 }
 
+func listenForSubNodeConnection() {
+	port := 3142
+	_, err := net.Dial("tcp", "127.0.0.1:3142")
+	handleError(err)
+}
+func listenForSubNodeDisconnection() {
+	port := 3143
+}
+
+var subNodes = make([]SubNode, 0)
+
 func main() {
 	const port = 3141
 
+	// Sets up /api/node-status endpoint
 	router := mux.NewRouter()
-
 	// Look over https://www.codementor.io/codehakase/building-a-restful-api-with-golang-a6yivzqdo to set POST/etc.
 	router.HandleFunc("/api/node-status", getNodeStatus).Methods("GET")
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
