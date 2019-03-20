@@ -14,5 +14,5 @@ Gaia is split up into 3 parts:
 ### Git Standards
 Git branches are in the format {Person Committing}/{Project Card Number}/{Brief Description}. An example branch looks like:
 ```
-git branch ash/19131340/CreatingBasicSubNode
+git branch ash/19131340/CreateBasicSubNode
 ```

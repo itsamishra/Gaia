@@ -4,21 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
+// Structs
 type NodeData struct {
 	IP           string
 	BatteryLevel float64
 }
-
 type SubNode struct {
-	Url  string
-	Name string
+	Url           string
+	Name          string
+	IP            string
+	UnixTimeAdded int64
 }
 
 // Adds header to prevent Access-Control-Allow-Origin CORS error
@@ -26,14 +28,15 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
+// Returns Sub Node data
 func getNodeStatus(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 
-	params := mux.Vars(r)
-	fmt.Println(params)
 	queryParams := r.URL.Query()
-	fmt.Println(queryParams)
-	fmt.Println(queryParams.Get("allNodes"))
+	allNodes, err := strconv.ParseBool(queryParams.Get("allNodes"))
+	handleError(err)
+
+	fmt.Println(allNodes)
 
 	nodeData := NodeData{
 		IP:           "123.456.789.0",
@@ -48,16 +51,26 @@ func getNodeStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(nodeDataSlice)
 }
 
-func listenForSubNodeConnection() {
-	port := 3142
-	_, err := net.Dial("tcp", "127.0.0.1:3142")
-	handleError(err)
-}
-func listenForSubNodeDisconnection() {
-	port := 3143
+// Adds Sub Node to list of Sub Nodes (with timestamp)
+func addSubNodeToList(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+
+	// Uses query params to create Sub Node
+	queryParams := r.URL.Query()
+	subNode := SubNode{
+		Url:           queryParams.Get("url"),
+		Name:          queryParams.Get("name"),
+		IP:            queryParams.Get("ip"),
+		UnixTimeAdded: time.Now().Unix(),
+	}
+
+	// Adds a new Sub Node to subNodesConnected
+	subNodesConnected[queryParams.Get("url")] = subNode
+	// fmt.Println(subNodesConnected)
+	// fmt.Println(len(subNodesConnected))
 }
 
-var subNodes = make([]SubNode, 0)
+var subNodesConnected = make(map[string]SubNode)
 
 func main() {
 	const port = 3141
@@ -66,6 +79,7 @@ func main() {
 	router := mux.NewRouter()
 	// Look over https://www.codementor.io/codehakase/building-a-restful-api-with-golang-a6yivzqdo to set POST/etc.
 	router.HandleFunc("/api/node-status", getNodeStatus).Methods("GET")
+	router.HandleFunc("/api/check-in", addSubNodeToList).Methods("GET")
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
 }
 
