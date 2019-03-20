@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <h3>Hello World</h3>
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script>
+        let urlBase = "http://127.0.0.1";
+        let port = 3141;
+        let urlParams = "/api/node-status";
+        let fullUrl = urlBase + ":" + port + urlParams;
+        console.log(fullUrl);
+
+        $.ajax({
+            type: 'GET',
+            crossDomain: true,
+            dataType: 'json',
+            url: fullUrl,
+            data: {
+                allNodes: true
+            },
+            success: function (jsondata) {
+                console.log(jsondata);
+            }
+        })
+    </script>
+</body>
+
+</html>
