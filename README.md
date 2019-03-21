@@ -11,8 +11,16 @@ Gaia is split up into 3 parts:
 3. A `Node.js` app that pulls data from the Master Node (via REST) and presents it in a browser as a datatable. It also allows the user some limited interaction with the Sub Node linux machines.
 ### Diagram
 [Coming Soon...]
+
 ### Git Standards
 Git branches are in the format {Person Committing}/{Project Card Number}/{Brief Description}. An example branch looks like:
 ```
 git branch ash/19131340/CreateBasicSubNode
 ```
+### Requirements
+#### Master Node Machine
+Golang 1.11+, (TBD - More to be added...)
+#### Sub Node Machine
+Golang 1.11+, (TBD - More to be added...)
+#### Web Browser Machine
+Node.js, (TBD - More to be added...)

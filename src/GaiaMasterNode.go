@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,11 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Structs
-type NodeData struct {
-	IP           string
-	BatteryLevel float64
-}
+// SubNode struct represents
 type SubNode struct {
 	Url           string
 	Name          string
@@ -33,22 +28,10 @@ func getNodeStatus(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
 
 	queryParams := r.URL.Query()
-	allNodes, err := strconv.ParseBool(queryParams.Get("allNodes"))
-	handleError(err)
+	fmt.Println("queryParams:")
+	fmt.Println(queryParams)
 
-	fmt.Println(allNodes)
-
-	nodeData := NodeData{
-		IP:           "123.456.789.0",
-		BatteryLevel: 76.5,
-	}
-
-	nodeDataSlice := make([]NodeData, 0)
-	nodeDataSlice = append(nodeDataSlice, nodeData)
-	nodeDataSlice = append(nodeDataSlice, nodeData)
-	nodeDataSlice = append(nodeDataSlice, nodeData)
-
-	json.NewEncoder(w).Encode(nodeDataSlice)
+	// json.NewEncoder(w).Encode(subNodeDataSlice)
 }
 
 // Adds Sub Node to list of Sub Nodes (with timestamp)
@@ -66,8 +49,8 @@ func addSubNodeToList(w http.ResponseWriter, r *http.Request) {
 
 	// Adds a new Sub Node to subNodesConnected
 	subNodesConnected[queryParams.Get("url")] = subNode
-	// fmt.Println(subNodesConnected)
-	// fmt.Println(len(subNodesConnected))
+	fmt.Println(subNodesConnected)
+	fmt.Println(len(subNodesConnected))
 }
 
 var subNodesConnected = make(map[string]SubNode)
