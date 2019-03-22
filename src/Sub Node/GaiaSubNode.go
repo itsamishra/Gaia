@@ -8,7 +8,7 @@ import (
 )
 
 // Returns external IP associated with this machine
-func getIp() string {
+func getIP() string {
 	// TODO: Add functionality
 	return "123.456.789.000"
 }
@@ -20,12 +20,12 @@ func getBatteryPercentage() string {
 }
 
 // Pings Master Node with updated Sub Node information every 'n' seconds
-func updateSubNodeInfo(ip string, port string, updateTimeDelaySecond float64) {
+func updateSubNodeInfo(masterNodeIP string, port string, updateTimeDelaySecond float64) {
 	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
 	for {
 		// Sends GET request to Master Node with Sub Node information
-		url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIp()
+		url := "http://" + masterNodeIP + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIP()
 		// TODO: Send data as POST instead of GET
 		resp, err := http.Get(url)
 		handleError(err)
