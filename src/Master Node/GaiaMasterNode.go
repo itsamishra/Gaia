@@ -12,6 +12,7 @@ import (
 type SubNode struct {
 	IP                     string
 	BatteryLevelPercentage float64
+	Screenshot             string // String??? Or some other datatype???
 	UnixTimestamp          int64
 }
 
