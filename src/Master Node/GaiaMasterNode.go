@@ -5,28 +5,37 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
+// SubNode struct contains system information from machine associated with Sub Node
 type SubNode struct {
 	IP                     string
 	BatteryLevelPercentage float64
+	UnixTimestamp          int64
 }
 
 // Updates subNodeSlice with SubNode
 func updateSubNodeStatus(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Params:")
-	fmt.Println(r.URL.Query())
-	fmt.Println(r.URL.Query().Get("BatteryLevelPercentage"))
-
-	// Creates SubNode struct and adds it to subNodeSlice
+	// Gets parameters from url
+	ip := r.URL.Query().Get("IP")
 	batteryLevelPercentage, err := strconv.ParseFloat(r.URL.Query().Get("BatteryLevelPercentage"), 64)
 	handleError(err)
-	subNode := SubNode{
-		BatteryLevelPercentage: batteryLevelPercentage,
-	}
-	fmt.Println(subNode)
 
-	// fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	// Creates SubNode struct
+	subNode := SubNode{
+		IP:                     ip,
+		BatteryLevelPercentage: batteryLevelPercentage,
+		UnixTimestamp:          time.Now().Unix(),
+	}
+
+	// Adds SubNode to subNodeSlice
+	subNodeSlice[ip] = subNode
+	fmt.Println("subNodeSlice:")
+	fmt.Println(subNodeSlice)
+	fmt.Printf("Number of SubNodes in subNodeSlice: %d\n", len(subNodeSlice))
+	fmt.Println("-----------------------------------------------------------------")
+
 	fmt.Fprintf(w, "SubNode Updated!")
 }
 
