@@ -8,9 +8,16 @@ import (
 )
 
 // Returns external IP associated with this machine
-func getIP() string {
-	// TODO: Add functionality
-	return "123.456.789.000"
+func getSubNodeIP() string {
+	resp, err := http.Get("http://ifconfig.me")
+	if err != nil {
+		// handle err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	handleError(err)
+	defer resp.Body.Close()
+
+	return string(body)
 }
 
 // Returns battery level (%) of this machine
@@ -23,9 +30,10 @@ func getBatteryPercentage() string {
 func updateSubNodeInfo(masterNodeIP string, port string, updateTimeDelaySecond float64) {
 	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
+	subNodeIP := getSubNodeIP()
 	for {
 		// Sends GET request to Master Node with Sub Node information
-		url := "http://" + masterNodeIP + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIP()
+		url := "http://" + masterNodeIP + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + subNodeIP
 		// TODO: Send data as POST instead of GET
 		resp, err := http.Get(url)
 		handleError(err)
