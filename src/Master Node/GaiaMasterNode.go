@@ -50,9 +50,9 @@ func handleError(err error) {
 var subNodeSlice = make(map[string]SubNode)
 
 func main() {
-	const port = "3141"
+	const masterNodePort = "3141"
 
 	// Updates subNodeSlice with SubNode
 	http.HandleFunc("/api/update-sub-node", updateSubNodeStatus)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+masterNodePort, nil))
 }

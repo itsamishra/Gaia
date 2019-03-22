@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -19,29 +20,25 @@ func getBatteryPercentage() string {
 }
 
 // Pings Master Node with updated Sub Node information every 'n' seconds
-func updateSubNodeInfo(ip string, port string) {
-	for {
-		url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIp()
+func updateSubNodeInfo(ip string, port string, updateTimeDelaySecond float64) {
+	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
+	for {
+		// Sends GET request to Master Node with Sub Node information
+		url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIp()
+		// TODO: Send data as POST instead of GET
 		resp, err := http.Get(url)
 		handleError(err)
 
-		fmt.Printf("Response: %s\n", resp)
+		// Prints out message from Master Node
+		body, err := ioutil.ReadAll(resp.Body)
+		handleError(err)
+		fmt.Println(string(body))
+		resp.Body.Close()
 
-		time.Sleep(2 * time.Second)
+		// Waits before sending information again
+		time.Sleep(timedelayMilliseconds * time.Millisecond)
 	}
-}
-
-func main() {
-	// Constants
-	const googleComputeIp = "35.243.155.9"
-	const localIp = "127.0.0.1"
-	var port = "3141"
-
-	// Constantly updates Master Node with updated Sub Node information
-	go updateSubNodeInfo(googleComputeIp, port)
-
-	time.Sleep(10 * time.Second)
 }
 
 // If error is passed in, throws error
@@ -49,4 +46,21 @@ func handleError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	// Master Node IP and port
+	var masterNodeIP = "35.243.155.9"
+	var masterNodePort = "3141"
+	var updateTimeDelaySecond float64 = 1
+
+	// Constantly updates Master Node with updated Sub Node information
+	go updateSubNodeInfo(masterNodeIP, masterNodePort, updateTimeDelaySecond)
+
+	// Infinite loop
+	for {
+	}
+
+	// Listens for instructions from Master Node
+	// TODO
 }

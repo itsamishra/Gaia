@@ -20,8 +20,8 @@ Git branches are in the format {Person Committing}/{Project Card Number}/{Brief 
 
 ### Requirements
 #### Master Node Machine
-`Golang 1.11+` (TBD - More to be added...)
+`Golang 1.11+`
 #### Sub Node Machine
-`Golang 1.11+` (TBD - More to be added...)
+`Golang 1.11+`, `curl`
 #### Web Browser Machine
-(TBD - More to be added...)
+`Node.js 11.11.0+`
