@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // Returns external IP associated with this machine
@@ -17,24 +18,18 @@ func getBatteryPercentage() string {
 	return "67.89"
 }
 
-// Pings Master Node with updated Sub Node information
+// Pings Master Node with updated Sub Node information every 'n' seconds
 func updateSubNodeInfo(ip string, port string) {
-	url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIp()
+	for {
+		url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=" + getBatteryPercentage() + "&IP=" + getIp()
 
-	resp, err := http.Get(url)
-	handleError(err)
+		resp, err := http.Get(url)
+		handleError(err)
 
-	fmt.Printf("Response: %s\n", resp)
+		fmt.Printf("Response: %s\n", resp)
 
-	// fmt.Printf("Response: %s\n", resp)
-}
-
-func test(ip string, port string) {
-	url := "http://" + ip + ":" + port + "/api/update-sub-node?BatteryLevelPercentage=67.89&IP=123.456.789.000"
-	resp, err := http.Get(url)
-	handleError(err)
-
-	fmt.Printf("Response: %s\n", resp)
+		time.Sleep(2 * time.Second)
+	}
 }
 
 func main() {
@@ -43,12 +38,10 @@ func main() {
 	const localIp = "127.0.0.1"
 	var port = "3141"
 
-	// resp, err := http.Get("http://35.243.155.9:3141/api/update-sub-node?BatteryLevelPercentage=67.89&IP=123.456.789.000")
-	// handleError(err)
-	// fmt.Printf("Response: %s\n", resp)
+	// Constantly updates Master Node with updated Sub Node information
+	go updateSubNodeInfo(googleComputeIp, port)
 
-	updateSubNodeInfo(googleComputeIp, port)
-	// test(googleComputeIp, port)
+	time.Sleep(10 * time.Second)
 }
 
 // If error is passed in, throws error
