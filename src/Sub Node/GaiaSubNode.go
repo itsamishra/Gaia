@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -22,9 +24,18 @@ func getSubNodeIP() string {
 
 // Returns battery level (%) of this machine
 func getBatteryPercentage() string {
-	// TODO: Add functionality
-	// Command to get battery % (Ubuntu): upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep "percentage:" | grep [0-9]*% | grep -o [0-9]*
-	return "67.89"
+	// Bash file containing command that gets battery level
+	cmd := "./getBatteryLevel.sh"
+
+	// Gets battery level
+	batteryLevelPercentageBytes, err := exec.Command(cmd).Output()
+	handleError(err)
+
+	// Trims \n from end of string
+	batteryLevelPercentage := string(batteryLevelPercentageBytes)
+	batteryLevelPercentage = strings.TrimSuffix(batteryLevelPercentage, "\n")
+
+	return batteryLevelPercentage
 }
 
 // TODO get screenshot of machine

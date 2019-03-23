@@ -22,6 +22,6 @@ Git branches are in the format {Person Committing}/{Project Card Number}/{Brief 
 #### Master Node Requirements
 `Golang 1.11+`
 #### Sub Node Requirements
-`Golang 1.11+`, `upower`, `imagemagick/import`
+`Golang 1.11+`, `bash`, `upower`, `imagemagick/import`
 #### Web Browser Requirements
 `Node.js 11.11.0+`
