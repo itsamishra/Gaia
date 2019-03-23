@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"reflect"
 	"strconv"
 )
 
@@ -37,8 +36,9 @@ func main() {
 	encoded := base64.StdEncoding.EncodeToString(imageFileBytes)
 	fmt.Println(len(encoded))
 
+	// Encodes base64 -> []byte
 	decoded, _ := base64.StdEncoding.DecodeString(encoded)
-	fmt.Println(reflect.TypeOf(decoded))
+	fmt.Println("File Size:")
 	fmt.Println(len([]byte(decoded)))
 
 	fmt.Println("Writing new file...")
