@@ -23,13 +23,18 @@ func getSubNodeIP() string {
 // Returns battery level (%) of this machine
 func getBatteryPercentage() string {
 	// TODO: Add functionality
-	// User upower -i /org/freedesktop/UPower/devices/battery_BAT0 (works on Ubuntu)
+	// Command to get battery % (Ubuntu): upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep "percentage:" | grep [0-9]*% | grep -o [0-9]*
 	return "67.89"
 }
 
 // TODO get screenshot of machine
+// Command (Ubuntu): import -window root root.png
 func getScreenshot() {
 
+}
+
+func loadImage(fileName string) {
+	fmt.Println(fileName)
 }
 
 // Pings Master Node with updated Sub Node information every 'n' seconds

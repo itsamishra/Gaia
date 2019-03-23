@@ -6,7 +6,7 @@ Gaia is a Network Monitoring Tool for Linux. It allows a user to monitor several
 ## Technical Details
 ### Technical Overview
 Gaia is split up into 3 parts:
-1. A `Golang`/`C`-based "Sub Node" running on each of the linux machines being monitored. The Sub Node collects information about the machine it's running on (e.g. battery level, IP address, hostname, etc.).
+1. A `Golang`-based "Sub Node" running on each of the linux machines being monitored. The Sub Node collects information about the machine it's running on (e.g. battery level, IP address, hostname, etc.).
 2. A `Golang`-based "Master Node" running on a server that the user (i.e. you) own. The Master Node is responsible for connecting to all Sub Nodes and collecting montioring information.
 3. A `Node.js` app that pulls data from the Master Node (via REST) and presents it in a browser as a datatable. It also allows the user some limited interaction with the Sub Node linux machines.
 
@@ -19,9 +19,9 @@ Git branches are in the format {Person Committing}/{Project Card Number}/{Brief 
 `git branch ash/19131340/CreateBasicSubNode`
 
 ### Requirements
-#### Master Node Machine
+#### Master Node Requirements
 `Golang 1.11+`
-#### Sub Node Machine
-`Golang 1.11+`, `upower`
-#### Web Browser Machine
+#### Sub Node Requirements
+`Golang 1.11+`, `upower`, `imagemagick/import`
+#### Web Browser Requirements
 `Node.js 11.11.0+`
