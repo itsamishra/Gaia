@@ -25,7 +25,7 @@ func getSubNodeIP() string {
 // Returns battery level (%) of this machine
 func getBatteryPercentage() string {
 	// Bash file containing command that gets battery level
-	cmd := "./getBatteryLevel.sh"
+	cmd := "./Bash Functions/getBatteryLevel.sh"
 
 	// Gets battery level
 	batteryLevelPercentageBytes, err := exec.Command(cmd).Output()
