@@ -31,10 +31,12 @@ func main() {
 
 	fmt.Println("File Size:")
 	fmt.Println(strconv.Itoa(len(imageFileBytes)) + " bytes")
+	fmt.Println(imageFileBytes)
 
 	// Encode []byte -> base64
 	encoded := base64.StdEncoding.EncodeToString(imageFileBytes)
 	fmt.Println(len(encoded))
+	// fmt.Println(encoded)
 
 	// Encodes base64 -> []byte
 	decoded, _ := base64.StdEncoding.DecodeString(encoded)
