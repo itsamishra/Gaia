@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -40,6 +41,22 @@ func updateSubNodeStatus(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "SubNode Updated!")
 }
 
+type myData struct {
+	Name  string
+	Photo string
+}
+
+func ping(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	var data myData
+	err := decoder.Decode(&data)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(data)
+}
+
 // If error is passed in, throws error
 func handleError(err error) {
 	if err != nil {
@@ -55,5 +72,6 @@ func main() {
 
 	// Updates subNodeSlice with SubNode
 	http.HandleFunc("/api/update-sub-node", updateSubNodeStatus)
+	http.HandleFunc("/api/ping", ping)
 	log.Fatal(http.ListenAndServe(":"+masterNodePort, nil))
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -71,6 +72,15 @@ func updateSubNodeInfo(masterNodeIP string, port string, updateTimeDelaySecond f
 	}
 }
 
+func pingMasterNode(masterNodeIP string, port string, updateTimeDelaySecond float64) {
+	url := "http://" + masterNodeIP + ":" + port + "/api/ping"
+	fmt.Println(url)
+
+	jsonString := []byte(`{"Name": "John","Photo": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII="}`)
+	_, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonString))
+	handleError(err)
+}
+
 // If error is passed in, throws error
 func handleError(err error) {
 	if err != nil {
@@ -80,12 +90,15 @@ func handleError(err error) {
 
 func main() {
 	// Master Node IP and port
-	var masterNodeIP = "35.243.155.9"
+	// var masterNodeIP = "35.243.155.9"
+	var localMasterNodeIP = "127.0.0.1"
 	var masterNodePort = "3141"
 	var updateTimeDelaySecond float64 = 1
 
 	// Constantly updates Master Node with updated Sub Node information
-	go updateSubNodeInfo(masterNodeIP, masterNodePort, updateTimeDelaySecond)
+	// go updateSubNodeInfo(localMasterNodeIP, masterNodePort, updateTimeDelaySecond)
+
+	pingMasterNode(localMasterNodeIP, masterNodePort, updateTimeDelaySecond)
 
 	// Infinite loop
 	for {
