@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -14,9 +16,7 @@ import (
 // Returns external IP associated with this machine
 func getSubNodeIP() string {
 	resp, err := http.Get("http://ifconfig.me")
-	if err != nil {
-		// handle err
-	}
+	handleError(err)
 	body, err := ioutil.ReadAll(resp.Body)
 	handleError(err)
 	defer resp.Body.Close()
@@ -28,7 +28,7 @@ func getSubNodeIP() string {
 func getBatteryPercentage() string {
 	// Bash file containing command that gets battery level
 	cmd := "./Bash Functions/getBatteryLevel.sh"
-
+	// cmd := "/home/am/go/src/Gaia/src/Sub Node/Bash Functions/getBatteryLevel.sh"
 	// Gets battery level
 	batteryLevelPercentageBytes, err := exec.Command(cmd).Output()
 	handleError(err)
@@ -42,28 +42,41 @@ func getBatteryPercentage() string {
 
 // Takes screenshot of desktop, then returns a base64 string representation of the screenshot
 func getBase64Screenshot() string {
-	// TODO: Take screenshot (use command: import -window root root.png)
+	// // TODO: Take screenshot (use command: import -window root root.png)
 
 	// Reads image file
-	imageName := "Screenshots/screenshot.png"
-	imageFileBytes, err := ioutil.ReadFile(imageName)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("File Size:")
-	fmt.Println(strconv.Itoa(len(imageFileBytes)) + " bytes")
+	// imageName := "Screenshots/screenshot.png"
+	imageName := "Screenshots/screen.png"
+	// imageName := "/home/am/go/src/Gaia/src/Sub Node/Screenshots/screenshot.png"
+
+	// imageFileBytes, err := ioutil.ReadFile(imageName)
+	// handleError(err)
+
+	buf := bytes.NewBuffer(nil)
+	f, err := os.Open(imageName)
+	handleError(err)
+
+	io.Copy(buf, f)
+	fmt.Println("okay")
+	handleError(err)
+	f.Close()
 
 	// Converts file to base64 string
-	encoded := base64.StdEncoding.EncodeToString(imageFileBytes)
-	fmt.Println(len(encoded))
-	// fmt.Println(encoded)
+	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	return encoded
+	// imageName := "Screenshots/s-shot.png"
+	// buf, err := ioutil.ReadFile(imageName)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// encoded := base64.StdEncoding.EncodeToString(buf)
+	// return encoded
 }
 
 // Pings Master Node with updated Sub Node information every 'n' seconds
 func updateSubNodeInfo(masterNodeIP string, port string, updateTimeDelaySecond float64) {
-	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
+	// timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
 	subNodeIP := getSubNodeIP()
 	for {
@@ -79,35 +92,43 @@ func updateSubNodeInfo(masterNodeIP string, port string, updateTimeDelaySecond f
 		resp.Body.Close()
 
 		// Waits before sending information again
-		time.Sleep(timedelayMilliseconds * time.Millisecond)
+		// time.Sleep(timedelayMilliseconds * time.Millisecond)
 	}
 }
 
-func pingMasterNode(masterNodeIP string, port string, updateTimeDelaySecond float64) {
-	url := "http://127.0.0.1:3141/api/ping"
+func pingMasterNode(masterNodeIP string, port string, updateTimeDelaySecond float64, endpoint string) {
+	// Converts time delay from seconds to milliseconds
+	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
-	base64Image := getBase64Screenshot()
-	// TODO: Replace 56.78 with actual battery %
-	batteryLevelPercentage := "56.78"
-	ip := getSubNodeIP()
-	payload := strings.NewReader(fmt.Sprintf("Base64Image=%s&BatteryLevelPercentage=%s&IP=%s", base64Image, batteryLevelPercentage, ip))
+	// Constructs url to Master Node
+	url := masterNodeIP + ":" + port + endpoint
+	subNodeIP := getSubNodeIP()
+	for {
+		// Gets system information and adds it to POST request payload
+		// TODO: Add screenshot capability
+		// base64Image := getBase64Screenshot()
+		base64Image := "TestImagePleaseIgnore"
+		batteryLevelPercentage := getBatteryPercentage()
+		payload := strings.NewReader(fmt.Sprintf("Base64Image=%s&BatteryLevelPercentage=%s&IP=%s", base64Image, batteryLevelPercentage, subNodeIP))
 
-	req, err := http.NewRequest("POST", url, payload)
-	handleError(err)
+		// Defines POST request with appropriate header(s)
+		req, err := http.NewRequest("POST", url, payload)
+		handleError(err)
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		// req.Header.Add("cache-control", "no-cache")
+		// req.Header.Add("Postman-Token", "93b74e57-31fd-436d-976c-e10f223dc185")
 
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	// req.Header.Add("cache-control", "no-cache")
-	// req.Header.Add("Postman-Token", "93b74e57-31fd-436d-976c-e10f223dc185")
+		// Sends POST request
+		res, err := http.DefaultClient.Do(req)
+		handleError(err)
+		body, err := ioutil.ReadAll(res.Body)
+		handleError(err)
+		fmt.Println(string(body))
+		res.Body.Close()
 
-	res, err := http.DefaultClient.Do(req)
-	handleError(err)
-
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	handleError(err)
-
-	// fmt.Println(res)
-	fmt.Println(string(body))
+		// Waits before sending information again
+		time.Sleep(timedelayMilliseconds * time.Millisecond)
+	}
 }
 
 // If error is passed in, throws error
@@ -119,19 +140,22 @@ func handleError(err error) {
 
 func main() {
 	// Master Node IP and port
-	// var masterNodeIP = "35.243.155.9"
-	var localMasterNodeIP = "127.0.0.1"
-	var masterNodePort = "3141"
-	var updateTimeDelaySecond float64 = 1
+	// var masterNodeIP = "http://35.243.155.9"
+	var localMasterNodeIP = "http://127.0.0.1"
 
-	// Constantly updates Master Node with updated Sub Node information
-	// go updateSubNodeInfo(localMasterNodeIP, masterNodePort, updateTimeDelaySecond)
-	getBase64Screenshot()
-	pingMasterNode(localMasterNodeIP, masterNodePort, updateTimeDelaySecond)
+	// Port on which Master Node listens
+	var masterNodePort = "3141"
+	// Time delay between pings to Master Node
+	var updateTimeDelaySecond float64 = 1
+	// Ping API endpoint
+	pingEndpoint := "/api/ping"
+
+	// Constantly pings Master Node with updated Sub Node information
+	go pingMasterNode(localMasterNodeIP, masterNodePort, updateTimeDelaySecond, pingEndpoint)
 
 	// Infinite loop
-	// for {
-	// }
+	for {
+	}
 
 	// Listens for instructions from Master Node
 	// TODO

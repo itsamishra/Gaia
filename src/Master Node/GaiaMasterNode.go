@@ -16,39 +16,8 @@ type SubNode struct {
 	UnixTimestamp           int64
 }
 
-// Updates subNodeSlice with SubNode
-func updateSubNodeStatus(w http.ResponseWriter, r *http.Request) {
-	// Gets parameters from url
-	ip := r.URL.Query().Get("IP")
-	batteryLevelPercentage, err := strconv.ParseFloat(r.URL.Query().Get("BatteryLevelPercentage"), 64)
-	handleError(err)
-
-	// Creates SubNode struct
-	subNode := SubNode{
-		IP:                     ip,
-		BatteryLevelPercentage: batteryLevelPercentage,
-		UnixTimestamp:          time.Now().Unix(),
-	}
-
-	// Adds SubNode to subNodeSlice
-	subNodeSlice[ip] = subNode
-	fmt.Println("subNodeSlice:")
-	fmt.Println(subNodeSlice)
-	fmt.Printf("Number of SubNodes in subNodeSlice: %d\n", len(subNodeSlice))
-	fmt.Println("-----------------------------------------------------------------")
-
-	fmt.Fprintf(w, "SubNode Updated!")
-}
-
-type myData struct {
-	Name  string
-	Photo string
-}
-
 // Accepts POST from Sub Nodes and updates their details
 func pingHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Ping Handled")
-
 	// Parses parameters
 	r.ParseForm()
 	ip := r.Form.Get("IP")
@@ -63,12 +32,17 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 		Base64EncodedScreenshot: base64EncodedScreenshot,
 		UnixTimestamp:           time.Now().Unix(),
 	}
-	fmt.Println(subNode)
+
+	// Adds SubNode to subNodeMap
+	subNodeMap[ip] = subNode
+	fmt.Println(subNodeMap)
+	fmt.Printf("Number of SubNodes in subNodeMap: %d\n", len(subNodeMap))
+	fmt.Println("-----------------------------------------------------------------")
 
 	fmt.Fprintf(w, "SubNode Updated!")
 }
 
-// If error is passed in, throws error
+// Handles error
 func handleError(err error) {
 	if err != nil {
 		panic(err)
@@ -76,13 +50,14 @@ func handleError(err error) {
 }
 
 // Stores map of IP (string) to SubNode structs
-var subNodeSlice = make(map[string]SubNode)
+var subNodeMap = make(map[string]SubNode)
 
 func main() {
+	// Node which the Master Node listens on
 	const masterNodePort = "3141"
 
-	// Updates subNodeSlice with SubNode
-	http.HandleFunc("/api/update-sub-node", updateSubNodeStatus)
+	// Updates subNodeMap with SubNode
+	// http.HandleFunc("/api/update-sub-node", updateSubNodeStatus)
 	http.HandleFunc("/api/ping", pingHandler)
 	log.Fatal(http.ListenAndServe(":"+masterNodePort, nil))
 }
