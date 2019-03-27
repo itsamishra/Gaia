@@ -1,4 +1,4 @@
 .idea/
 *.secret
 .vscode/
-./src/Sub Node/Screenshots/
+src/Sub Node/Screenshots/
