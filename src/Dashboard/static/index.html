@@ -12,12 +12,12 @@
     <h3>Hello World</h3>
 
     <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script>
         let urlBase = "http://127.0.0.1";
         let port = 3141;
-        let urlParams = "/api/node-status";
+        let urlParams = "/api/getInfo";
         let fullUrl = urlBase + ":" + port + urlParams;
         console.log(fullUrl);
 
@@ -30,9 +30,15 @@
                 allNodes: true
             },
             success: function (jsondata) {
-                console.log(jsondata);
-            }
+                console.log("SUCCESS");
+            },
+            // beforeSend: setHeader
         })
+
+        function setHeader(xhr) {
+
+            xhr.setRequestHeader('Authorization', token);
+        }
     </script>
 </body>
 

@@ -102,17 +102,19 @@ func main() {
 	pingEndpoint := "/api/ping" // Ping API endpoint
 
 	// Time delay between pings to Master Node
-	var updateTimeDelaySecond float64 = 1
+	var updateTimeDelaySecond float64 = 5
 	timedelayMilliseconds := time.Duration(updateTimeDelaySecond * 1000)
 
 	// Listens for instructions from Master Node
 	// TODO
 
+	// Constructs url to Master Node
+	url := masterNodeIP + ":" + masterNodePort + pingEndpoint
+	// Gets Sub Node IP
+	subNodeIP := getSubNodeIP()
+
 	// Pings Master Node at regular intervals with new system information
 	for {
-		// Constructs url to Master Node
-		url := masterNodeIP + ":" + masterNodePort + pingEndpoint
-		subNodeIP := getSubNodeIP()
 		pingMasterNode(url, subNodeIP, updateTimeDelaySecond)
 		time.Sleep(timedelayMilliseconds * time.Millisecond)
 	}

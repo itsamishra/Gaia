@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -42,6 +43,15 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "SubNode Updated!")
 }
 
+func getInfoHandler(w http.ResponseWriter, r *http.Request) {
+	// Converts subNodeMap to JSON
+	subNodeJSON, err := json.Marshal(subNodeMap)
+	handleError(err)
+
+	// Sends subNodeJSON
+	fmt.Fprintf(w, string(subNodeJSON))
+}
+
 // Handles error
 func handleError(err error) {
 	if err != nil {
@@ -57,7 +67,8 @@ func main() {
 	const masterNodePort = "3141"
 
 	// Updates subNodeMap with SubNode
-	// http.HandleFunc("/api/update-sub-node", updateSubNodeStatus)
 	http.HandleFunc("/api/ping", pingHandler)
+	// Sends out Sub Node information to Dashboard
+	http.HandleFunc("/api/getInfo", getInfoHandler)
 	log.Fatal(http.ListenAndServe(":"+masterNodePort, nil))
 }
