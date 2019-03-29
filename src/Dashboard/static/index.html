@@ -37,6 +37,7 @@
                 <th>IP</th>
                 <th>Snapshot</th>
                 <th>Battery Level (%)</th>
+                <th>Port Usage</th>
                 <th>Unix Timestamp</th>
                 <th>Status</th>
             </tr>
@@ -74,7 +75,8 @@
             success: function (jsondata) {
                 console.log("SUCCESS");
             }
-        })*/
+        })
+        */
 
         function refreshTable() {
             // TODO Use jQuery to GET data
@@ -120,7 +122,7 @@
         // Adds row to table
         function addRow(ip, unixTimestamp, batteryPercentage, status, base64EncodedImage) {
             let row =
-                `<tr><td>${ip}</td><td><img src="data:image/png;base64, ${base64EncodedImage}"></td><td>${batteryPercentage}</td><td>${unixTimestamp}</td><td>${status}</td></tr>`
+                `<tr><td>${ip}</td><td><img src="data:image/png;base64, ${base64EncodedImage}"></td><td>${batteryPercentage}</td><td>Port 123 - App XYZ<br/>Port 456 - App LMN</td><td>${unixTimestamp}</td><td>${status}</td></tr>`
             $(".rows").append(row);
         };
 
