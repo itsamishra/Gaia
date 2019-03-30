@@ -57,26 +57,23 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
     </script>
     <script>
-        /*
-        let urlBase = "http://127.0.0.1";
-        let port = 3141;
-        let urlParams = "/api/getInfo";
-        let fullUrl = urlBase + ":" + port + urlParams;
-        console.log(fullUrl);
-
         $.ajax({
             type: 'GET',
             crossDomain: true,
             dataType: 'json',
-            url: fullUrl,
-            data: {
-                allNodes: true
-            },
+            url: "http://127.0.0.1:3000/getUpdate",
             success: function (jsondata) {
                 console.log("SUCCESS");
+                console.log(jsondata);
+                console.log(Object.keys(jsondata));
+
+                addRow("123", 123, 123, "123", jsondata["75.155.168.48"].Base64EncodedScreenshot)
+            },
+            error: function(){
+                console.log("ERROR");
             }
-        })
-        */
+        });
+
 
         function refreshTable() {
             // TODO Use jQuery to GET data
