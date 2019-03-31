@@ -37,7 +37,7 @@
                 <th>IP</th>
                 <th>Snapshot</th>
                 <th>Battery Level (%)</th>
-                <th>Port Usage</th>
+                <th>Port Usage<br/>(Port #, Status, App)</th>
                 <th>Unix Timestamp</th>
                 <th>Status</th>
             </tr>
@@ -47,17 +47,15 @@
         </tbody>
     </table>
 
-    <!-- JS -->
+    <!-- Javascript -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-
-    <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         // Adds row to table
-        function addRow(ip, unixTimestamp, batteryPercentage, status, base64EncodedImage) {
+        function addRow(ip, unixTimestamp, batteryPercentage, status, base64EncodedImage, portInfo) {
             let row =
-                `<tr><td>${ip}</td><td><img src="data:image/png;base64, ${base64EncodedImage}"></td><td>${batteryPercentage}</td><td>Port 123 - App XYZ<br/>Port 456 - App LMN</td><td>${unixTimestamp}</td><td>${status}</td></tr>`
+                `<tr><td>${ip}</td><td><img src="data:image/png;base64, ${base64EncodedImage}"></td><td>${batteryPercentage}</td><td>${portInfo}</td><td>${unixTimestamp}</td><td>${status}</td></tr>`
             $(".rows").append(row);
         };
 
@@ -68,9 +66,6 @@
 
         // Refreshed data in table
         function refreshTable() {
-            // Deletes all current rows
-            deleteAllRows();
-
             // Gets Sub Node info and uses it to repopulate table
             $.ajax({
                 type: 'GET',
@@ -78,6 +73,9 @@
                 dataType: 'json',
                 url: "http://127.0.0.1:3000/getUpdate",
                 success: function (jsondata) {
+                    // Deletes all current rows
+                    deleteAllRows();
+
                     console.log("SUCCESS");
                     console.log(jsondata);
 
@@ -86,15 +84,16 @@
                     console.log("Keys:");
                     for (let i = 0; i < subNodeJsonKeys.length; i++) {
                         let key = subNodeJsonKeys[i];
-                        console.log(key);
 
                         let base64Image = jsondata[key].Base64EncodedScreenshot;
                         base64Image = base64Image.replace(/ /gi, "+");
                         let ip = jsondata[key].IP;
                         let unixTimestamp = jsondata[key].UnixTimestamp;
                         let batteryPercentage = jsondata[key].BatteryLevelPercentage;
+                        let portInfo = jsondata[key].PortInfo;
+                        portInfo = portInfo.replace(/\n/g, "<br/>");
 
-                        addRow(ip, unixTimestamp, batteryPercentage, "123", base64Image)
+                        addRow(ip, unixTimestamp, batteryPercentage, "123", base64Image, portInfo)
                     }
                 },
                 error: function () {

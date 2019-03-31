@@ -15,6 +15,7 @@ type SubNode struct {
 	BatteryLevelPercentage  float64
 	Base64EncodedScreenshot string
 	UnixTimestamp           int64
+	PortInfo                string
 }
 
 // Accepts POST from Sub Nodes and updates their details
@@ -23,6 +24,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	ip := r.Form.Get("IP")
 	base64EncodedScreenshot := r.Form.Get("Base64Image")
+	portInfo := r.Form.Get("PortInfo")
 	batteryLevelPercentage, err := strconv.ParseFloat(r.Form.Get("BatteryLevelPercentage"), 64)
 	handleError(err)
 
@@ -32,6 +34,7 @@ func pingHandler(w http.ResponseWriter, r *http.Request) {
 		BatteryLevelPercentage:  batteryLevelPercentage,
 		Base64EncodedScreenshot: base64EncodedScreenshot,
 		UnixTimestamp:           time.Now().Unix(),
+		PortInfo:                portInfo,
 	}
 
 	// Adds SubNode to subNodeMap

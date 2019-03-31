@@ -11,6 +11,18 @@ import (
 	"time"
 )
 
+// Gets networking port information
+func getOpenPorts() string {
+	cmd := "./Bash Functions/getOpenPorts.sh"
+
+	// Get's output of 'nmap' command
+	openPortsByte, _ := exec.Command(cmd).Output()
+	openPortsString := string(openPortsByte)
+	openPortsString = strings.Trim(openPortsString, "\n")
+
+	return openPortsString
+}
+
 // Returns external IP associated with this machine
 func getSubNodeIP() string {
 	resp, err := http.Get("http://ifconfig.me")
@@ -66,7 +78,9 @@ func pingMasterNode(url string, subNodeIP string, updateTimeDelaySecond float64)
 	// Gets system information and adds it to POST request payload
 	base64Image := getBase64Screenshot()
 	batteryLevelPercentage := getBatteryPercentage()
-	payload := strings.NewReader(fmt.Sprintf("Base64Image=%s&BatteryLevelPercentage=%s&IP=%s", base64Image, batteryLevelPercentage, subNodeIP))
+	portInfo := getOpenPorts()
+	fmt.Println(portInfo)
+	payload := strings.NewReader(fmt.Sprintf("Base64Image=%s&BatteryLevelPercentage=%s&IP=%s&PortInfo=%s", base64Image, batteryLevelPercentage, subNodeIP, portInfo))
 
 	// Defines POST request with appropriate header(s)
 	req, err := http.NewRequest("POST", url, payload)
