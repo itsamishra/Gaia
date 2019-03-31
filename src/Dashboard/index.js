@@ -22,14 +22,8 @@ app.get("/getUpdate", function (req, res) {
             return console.log(err);
         }
         console.log(body);
-        // console.log(body.explanation);
         res.json(body);
     });
-
-    // let testJson = {
-    //     1: "one"
-    // };
-    // res.json(testJson);
 });
 
 app.listen(port, "127.0.0.1", function () {

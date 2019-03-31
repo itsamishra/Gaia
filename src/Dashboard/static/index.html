@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Sub Node Dashboard</title>
 
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
         thead {
             text-align: center;
@@ -27,11 +27,11 @@
 </head>
 
 <body>
-    <h1 style="text-align:center">Dashboard</h1>
+    <h1 style="text-align:center">Sub Node Dashboard</h1>
 
     <br /><br />
 
-    <table id="myTable" class="display" align="center">
+    <table class="striped">
         <thead>
             <tr>
                 <th>IP</th>
@@ -50,72 +50,10 @@
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
-    </script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
-    </script>
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
-        $.ajax({
-            type: 'GET',
-            crossDomain: true,
-            dataType: 'json',
-            url: "http://127.0.0.1:3000/getUpdate",
-            success: function (jsondata) {
-                console.log("SUCCESS");
-                console.log(jsondata);
-                console.log(Object.keys(jsondata));
-
-                addRow("123", 123, 123, "123", jsondata["75.155.168.48"].Base64EncodedScreenshot)
-            },
-            error: function(){
-                console.log("ERROR");
-            }
-        });
-
-
-        function refreshTable() {
-            // TODO Use jQuery to GET data
-            mockData = [{
-                    ip: "123.456.789.000",
-                    unixTimestamp: 1553811991,
-                    batteryPercentage: 67,
-                    base64EncodedImage: "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"
-                },
-                {
-                    ip: "127.0.0.1",
-                    unixTimestamp: 1553811991,
-                    batteryPercentage: 12,
-                    base64EncodedImage: "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"
-                },
-                {
-                    ip: "127.0.0.1",
-                    unixTimestamp: 1553811991,
-                    batteryPercentage: 12,
-                    base64EncodedImage: "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"
-                }
-            ];
-
-            // Deletes all current rows
-            deleteAllRows();
-
-            // Adds new rows
-            for (let i = 0; i < mockData.length; i++) {
-                // Calculates 'status' of each Sub Node (if it's been less than 1 minute since an update -> Online, else Reconnecting...)
-                let clientUnixTimestamp = Math.floor(Date.now() / 1000);
-                let status = "";
-                if ((clientUnixTimestamp - mockData[i]["unixTimestamp"]) < 60) {
-                    status = "Online";
-                } else {
-                    status = "Reconnecting...";
-                }
-
-                addRow(mockData[i]["ip"], mockData[i]["unixTimestamp"], mockData[i]["batteryPercentage"], status,
-                    mockData[i]["base64EncodedImage"])
-            }
-        }
-
         // Adds row to table
         function addRow(ip, unixTimestamp, batteryPercentage, status, base64EncodedImage) {
             let row =
@@ -123,10 +61,47 @@
             $(".rows").append(row);
         };
 
+        // Removes all rows from table
         function deleteAllRows() {
             $(".rows").empty();
         };
 
+        // Refreshed data in table
+        function refreshTable() {
+            // Deletes all current rows
+            deleteAllRows();
+
+            // Gets Sub Node info and uses it to repopulate table
+            $.ajax({
+                type: 'GET',
+                crossDomain: true,
+                dataType: 'json',
+                url: "http://127.0.0.1:3000/getUpdate",
+                success: function (jsondata) {
+                    console.log("SUCCESS");
+                    console.log(jsondata);
+
+                    let subNodeJsonKeys = Object.keys(jsondata);
+
+                    console.log("Keys:");
+                    for (let i = 0; i < subNodeJsonKeys.length; i++) {
+                        let key = subNodeJsonKeys[i];
+                        console.log(key);
+
+                        let base64Image = jsondata[key].Base64EncodedScreenshot;
+                        base64Image = base64Image.replace(/ /gi, "+");
+                        let ip = jsondata[key].IP;
+                        let unixTimestamp = jsondata[key].UnixTimestamp;
+                        let batteryPercentage = jsondata[key].BatteryLevelPercentage;
+
+                        addRow(ip, unixTimestamp, batteryPercentage, "123", base64Image)
+                    }
+                },
+                error: function () {
+                    console.log("ERROR");
+                }
+            });
+        }
 
         // Constantly refreshes table every 'n' seconds
         refreshTable();
