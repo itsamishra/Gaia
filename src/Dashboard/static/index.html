@@ -37,7 +37,7 @@
                 <th>IP</th>
                 <th>Snapshot</th>
                 <th>Battery Level (%)</th>
-                <th>Port Usage<br/>(Port #, Status, App)</th>
+                <th>Port Usage<br />(Port #, Status, App)</th>
                 <th>Unix Timestamp</th>
                 <th>Status</th>
             </tr>
@@ -76,12 +76,9 @@
                     // Deletes all current rows
                     deleteAllRows();
 
-                    console.log("SUCCESS");
-                    console.log(jsondata);
-
                     let subNodeJsonKeys = Object.keys(jsondata);
 
-                    console.log("Keys:");
+                    // Loops through all Sub Nodes
                     for (let i = 0; i < subNodeJsonKeys.length; i++) {
                         let key = subNodeJsonKeys[i];
 
@@ -93,7 +90,18 @@
                         let portInfo = jsondata[key].PortInfo;
                         portInfo = portInfo.replace(/\n/g, "<br/>");
 
-                        addRow(ip, unixTimestamp, batteryPercentage, "123", base64Image, portInfo)
+                        // Calculates 'Status' of current Sub Node
+                        let currentUnixTmestamp = Math.floor(Date.now() / 1000);
+                        let status = "";
+                        if ((currentUnixTmestamp - unixTimestamp) < 60){
+                            status = "Connected";
+                        }
+                        else{
+                            status = "Reconnecting...";
+                        }
+
+                        // Creates row with data from Sub Node
+                        addRow(ip, unixTimestamp, batteryPercentage, status, base64Image, portInfo)
                     }
                 },
                 error: function () {

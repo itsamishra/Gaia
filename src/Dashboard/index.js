@@ -6,14 +6,16 @@ const request = require('request');
 const port = 3000;
 const app = express();
 
-app.use(cors())
+app.use(cors());
 
+// Sub Node Dashboard
 app.get("/", function (req, res) {
     res.header("Access-Control-Allow-Origin", "*");
     req.header("Access-Control-Allow-Origin", "*");
     res.sendFile(path.join(__dirname + "/static" + "/index.html"))
 });
 
+// Gets information from Master Node and passes it to Dashboard
 app.get("/getUpdate", function (req, res) {
     request('http://localhost:3141/api/getInfo', {
         json: true
