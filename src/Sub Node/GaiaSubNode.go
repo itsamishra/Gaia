@@ -111,7 +111,7 @@ func main() {
 	const localMasterNodeIP = "http://127.0.0.1"
 
 	// Configures network
-	var masterNodeIP = localMasterNodeIP
+	var masterNodeIP = googleMasterNodeIP
 	var masterNodePort = "3141" // Port on which Master Node listens
 	pingEndpoint := "/api/ping" // Ping API endpoint
 

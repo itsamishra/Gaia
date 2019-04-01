@@ -17,7 +17,7 @@ app.get("/", function (req, res) {
 
 // Gets information from Master Node and passes it to Dashboard
 app.get("/getUpdate", function (req, res) {
-    request('http://localhost:3141/api/getInfo', {
+    request('http://35.243.155.9:3141/api/getInfo', {
         json: true
     }, (err, _, body) => {
         if (err) {
